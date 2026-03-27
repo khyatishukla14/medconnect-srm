@@ -1,0 +1,1623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SRM MedConnect — Student Health Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f2ed;
+    --bg2: #ede9e1;
+    --surface: #ffffff;
+    --surface2: #faf8f5;
+    --border: #e0dbd2;
+    --text: #1a1814;
+    --text2: #5a5650;
+    --text3: #9a9590;
+    --accent: #c8402a;
+    --accent2: #e85d3f;
+    --accent-light: #fdf0ed;
+    --green: #2a7a4a;
+    --green-light: #edf7f2;
+    --blue: #2a5fa8;
+    --blue-light: #edf2fc;
+    --amber: #b86a00;
+    --amber-light: #fff8ed;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --shadow: 0 2px 16px rgba(0,0,0,0.07);
+    --shadow-lg: 0 8px 40px rgba(0,0,0,0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* ── LOGIN SCREEN ── */
+  #login-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #1a1814 0%, #2d2620 50%, #1a1814 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  #login-screen::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 30% 40%, rgba(200,64,42,0.15) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 70%, rgba(42,95,168,0.1) 0%, transparent 50%);
+  }
+  .login-card {
+    background: var(--surface);
+    border-radius: 24px;
+    padding: 56px 48px;
+    width: 460px;
+    position: relative;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.4);
+    animation: fadeUp 0.6s ease;
+  }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
+  .login-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .login-logo .logo-icon {
+    width: 48px; height: 48px;
+    background: var(--accent);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+  }
+  .login-logo h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px;
+    color: var(--text);
+  }
+  .login-logo span { color: var(--accent); }
+  .login-sub { color: var(--text3); font-size: 13px; margin-bottom: 36px; }
+  .role-tabs {
+    display: flex; gap: 8px; margin-bottom: 28px;
+    background: var(--bg2); border-radius: var(--radius-sm); padding: 4px;
+  }
+  .role-tab {
+    flex: 1; padding: 10px; border: none; background: none;
+    border-radius: 6px; cursor: pointer; font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 500; color: var(--text2);
+    transition: all 0.2s;
+  }
+  .role-tab.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+  .form-group { margin-bottom: 18px; }
+  .form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--text2); margin-bottom: 6px; letter-spacing: 0.5px; text-transform: uppercase; }
+  .form-group input, .form-group select {
+    width: 100%; padding: 12px 16px;
+    border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif; font-size: 14px;
+    background: var(--surface); color: var(--text);
+    transition: border-color 0.2s;
+    outline: none;
+  }
+  .form-group input:focus, .form-group select:focus { border-color: var(--accent); }
+  .btn-primary {
+    width: 100%; padding: 14px;
+    background: var(--accent); color: white;
+    border: none; border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+    letter-spacing: 0.3px;
+  }
+  .btn-primary:hover { background: var(--accent2); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(200,64,42,0.3); }
+  .demo-hint { text-align: center; font-size: 12px; color: var(--text3); margin-top: 16px; }
+
+  /* ── MAIN APP ── */
+  #app { display: none; min-height: 100vh; }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    height: 64px;
+    display: flex; align-items: center; justify-content: space-between;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.05);
+  }
+  .nav-brand { display: flex; align-items: center; gap: 10px; }
+  .nav-brand .logo-mark {
+    width: 36px; height: 36px; background: var(--accent);
+    border-radius: 9px; display: flex; align-items: center; justify-content: center;
+    font-size: 18px; color: white;
+  }
+  .nav-brand h2 { font-family: 'DM Serif Display', serif; font-size: 20px; }
+  .nav-brand h2 span { color: var(--accent); }
+  .nav-links { display: flex; gap: 4px; }
+  .nav-link {
+    padding: 8px 16px; border-radius: 8px; border: none; background: none;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+    color: var(--text2); cursor: pointer; transition: all 0.2s; position: relative;
+  }
+  .nav-link:hover { background: var(--bg); color: var(--text); }
+  .nav-link.active { color: var(--accent); background: var(--accent-light); }
+  .nav-link .badge {
+    position: absolute; top: 4px; right: 6px;
+    width: 8px; height: 8px; background: var(--accent); border-radius: 50%;
+  }
+  .nav-right { display: flex; align-items: center; gap: 12px; }
+  .user-chip {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 12px; background: var(--bg2); border-radius: 20px;
+    font-size: 13px; font-weight: 500;
+  }
+  .user-chip .avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--accent); color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+  }
+  .btn-logout {
+    padding: 7px 14px; border-radius: 7px; border: 1.5px solid var(--border);
+    background: none; font-family: 'DM Sans', sans-serif; font-size: 13px;
+    color: var(--text2); cursor: pointer; transition: all 0.2s;
+  }
+  .btn-logout:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* PAGE LAYOUT */
+  .page-wrapper { padding-top: 64px; }
+  .page { display: none; padding: 36px 32px; max-width: 1200px; margin: 0 auto; }
+  .page.active { display: block; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+  .page-header { margin-bottom: 32px; }
+  .page-header h2 { font-family: 'DM Serif Display', serif; font-size: 30px; margin-bottom: 4px; }
+  .page-header p { color: var(--text2); font-size: 14px; }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+  .card-body { padding: 24px; }
+
+  /* GRID */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
+
+  /* STAT CARDS */
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow);
+  }
+  .stat-label { font-size: 12px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .stat-value { font-family: 'DM Serif Display', serif; font-size: 32px; }
+  .stat-sub { font-size: 12px; color: var(--text3); margin-top: 4px; }
+
+  /* DEPT CARDS */
+  .dept-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+  .dept-card {
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: var(--radius); padding: 24px; cursor: pointer;
+    transition: all 0.25s; position: relative; overflow: hidden;
+  }
+  .dept-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:3px;
+    background: var(--accent); transform: scaleX(0); transition: transform 0.25s;
+  }
+  .dept-card:hover { border-color: var(--accent); box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+  .dept-card:hover::before { transform: scaleX(1); }
+  .dept-icon { font-size: 28px; margin-bottom: 12px; }
+  .dept-name { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+  .dept-info { font-size: 13px; color: var(--text2); }
+  .dept-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    margin-top: 10px; padding: 4px 10px; border-radius: 20px;
+    font-size: 12px; font-weight: 600;
+  }
+  .badge-green { background: var(--green-light); color: var(--green); }
+  .badge-amber { background: var(--amber-light); color: var(--amber); }
+  .badge-red { background: var(--accent-light); color: var(--accent); }
+  .dot { width: 7px; height: 7px; border-radius: 50; display:inline-block; }
+  .dot-green { background: var(--green); border-radius:50%; }
+  .dot-amber { background: var(--amber); border-radius:50%; }
+  .dot-red { background: var(--accent); border-radius:50%; }
+
+  /* DOCTOR CARDS */
+  .doctor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .doctor-card {
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: var(--radius); padding: 20px;
+    transition: all 0.2s;
+  }
+  .doctor-card:hover { border-color: var(--accent); box-shadow: var(--shadow); }
+  .doctor-header { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 14px; }
+  .doctor-avatar {
+    width: 52px; height: 52px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 700; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--accent-light), #fde8e3);
+    color: var(--accent);
+    font-family: 'DM Serif Display', serif;
+  }
+  .doctor-info h4 { font-weight: 700; font-size: 15px; margin-bottom: 2px; }
+  .doctor-info .spec { font-size: 12px; color: var(--text2); margin-bottom: 4px; }
+  .available-slots { font-size: 12px; margin-bottom: 14px; }
+  .slots { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .slot {
+    padding: 5px 12px; border-radius: 6px; border: 1.5px solid var(--border);
+    font-size: 12px; font-family: 'JetBrains Mono', monospace; cursor: pointer;
+    transition: all 0.15s; background: var(--surface);
+  }
+  .slot:hover, .slot.selected { background: var(--accent); color: white; border-color: var(--accent); }
+  .slot.booked { background: var(--bg2); color: var(--text3); cursor: not-allowed; border-color: var(--border); text-decoration: line-through; }
+  .btn-book {
+    width: 100%; padding: 10px; border-radius: var(--radius-sm);
+    background: var(--accent); color: white; border: none;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; margin-top: 12px;
+  }
+  .btn-book:hover { background: var(--accent2); }
+  .btn-book:disabled { background: var(--border); color: var(--text3); cursor: not-allowed; }
+
+  /* SEARCH/FILTER */
+  .filter-bar { display: flex; gap: 12px; margin-bottom: 24px; align-items: center; }
+  .search-box {
+    flex: 1; position: relative;
+  }
+  .search-box input {
+    width: 100%; padding: 11px 16px 11px 40px;
+    border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif; font-size: 14px;
+    background: var(--surface); color: var(--text); outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-box input:focus { border-color: var(--accent); }
+  .search-box .icon { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); font-size: 16px; }
+  .filter-select {
+    padding: 11px 16px; border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif; font-size: 14px; background: var(--surface);
+    color: var(--text); outline: none; cursor: pointer;
+  }
+
+  /* APPOINTMENTS */
+  .appt-list { display: flex; flex-direction: column; gap: 12px; }
+  .appt-item {
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: var(--radius); padding: 18px 20px;
+    display: flex; align-items: center; gap: 16px;
+    transition: all 0.2s;
+  }
+  .appt-item:hover { border-color: var(--border); box-shadow: var(--shadow); }
+  .appt-date-block {
+    width: 60px; text-align: center; flex-shrink: 0;
+    background: var(--accent-light); border-radius: 10px; padding: 10px 8px;
+  }
+  .appt-date-block .day { font-family: 'DM Serif Display', serif; font-size: 24px; color: var(--accent); line-height: 1; }
+  .appt-date-block .month { font-size: 11px; font-weight: 600; color: var(--accent); text-transform: uppercase; }
+  .appt-details { flex: 1; }
+  .appt-details h4 { font-weight: 700; font-size: 15px; margin-bottom: 2px; }
+  .appt-details .meta { font-size: 13px; color: var(--text2); }
+  .appt-time {
+    font-family: 'JetBrains Mono', monospace; font-size: 13px;
+    background: var(--blue-light); color: var(--blue);
+    padding: 4px 10px; border-radius: 6px; font-weight: 500;
+  }
+  .status-badge {
+    padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;
+    white-space: nowrap;
+  }
+  .status-confirmed { background: var(--green-light); color: var(--green); }
+  .status-pending { background: var(--amber-light); color: var(--amber); }
+  .status-cancelled { background: var(--accent-light); color: var(--accent); }
+  .btn-sm {
+    padding: 7px 14px; border-radius: 7px; font-size: 12px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif;
+    border: 1.5px solid var(--border); background: var(--surface); color: var(--text2);
+  }
+  .btn-sm:hover { border-color: var(--text2); color: var(--text); }
+  .btn-sm.danger:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* RECEIPT / BOOKING CARD */
+  .booking-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-lg);
+    max-width: 380px;
+  }
+  .booking-card-header {
+    background: linear-gradient(135deg, #1a1814 0%, #2d2620 100%);
+    padding: 24px; color: white; text-align: center; position: relative;
+  }
+  .booking-card-header::after {
+    content: '';
+    position: absolute; bottom: -12px; left: 0; right: 0;
+    height: 24px; background: var(--surface);
+    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  }
+  .booking-card-header .logo { font-family: 'DM Serif Display', serif; font-size: 22px; margin-bottom: 4px; }
+  .booking-card-header .logo span { color: var(--accent2); }
+  .booking-card-body { padding: 28px 24px 24px; }
+  .bk-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+  .bk-label { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; }
+  .bk-value { font-size: 14px; font-weight: 600; text-align: right; }
+  .bk-qr { display: flex; justify-content: center; margin: 20px 0; }
+  .qr-mock {
+    width: 100px; height: 100px; background: var(--text);
+    border-radius: 8px; padding: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 8px; color: white; text-align: center; font-family: 'JetBrains Mono', monospace;
+  }
+  .bk-divider { border: none; border-top: 1.5px dashed var(--border); margin: 18px 0; }
+  .booking-id { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--accent); font-weight: 500; }
+
+  /* PRESCRIPTION */
+  .rx-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow);
+  }
+  .rx-header {
+    background: linear-gradient(135deg, #1a1814, #2d2620);
+    color: white; padding: 20px 24px; display: flex; justify-content: space-between; align-items: flex-start;
+  }
+  .rx-header h3 { font-family: 'DM Serif Display', serif; font-size: 20px; margin-bottom: 2px; }
+  .rx-header .rx-date { font-size: 12px; opacity: 0.7; }
+  .rx-symbol { font-size: 36px; opacity: 0.4; font-family: 'DM Serif Display', serif; font-style: italic; }
+  .rx-body { padding: 24px; }
+  .rx-patient { background: var(--bg2); border-radius: 10px; padding: 14px 18px; margin-bottom: 20px; display: flex; gap: 24px; }
+  .rx-patient .field { }
+  .rx-patient .field label { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; display: block; margin-bottom: 2px; }
+  .rx-patient .field span { font-size: 14px; font-weight: 600; }
+  .rx-meds h4 { font-size: 13px; font-weight: 700; color: var(--text2); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .med-row { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .med-row:last-child { border-bottom: none; }
+  .med-num { width: 28px; height: 28px; background: var(--accent-light); color: var(--accent); border-radius: 50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0; }
+  .med-name { font-weight: 700; font-size: 14px; }
+  .med-dose { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .rx-notes { margin-top: 18px; background: var(--amber-light); border-radius: 8px; padding: 12px 16px; font-size: 13px; color: var(--amber); }
+  .rx-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .doc-sig { font-family: 'DM Serif Display', serif; font-style: italic; font-size: 18px; color: var(--text); }
+
+  /* CHAT */
+  .chat-container { display: flex; gap: 20px; height: calc(100vh - 180px); min-height: 500px; }
+  .chat-sidebar {
+    width: 300px; flex-shrink: 0; background: var(--surface);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    overflow: hidden; display: flex; flex-direction: column;
+  }
+  .chat-sidebar-header { padding: 16px 20px; border-bottom: 1px solid var(--border); font-weight: 700; font-size: 14px; }
+  .chat-list { flex: 1; overflow-y: auto; }
+  .chat-item {
+    display: flex; gap: 12px; align-items: center; padding: 14px 18px;
+    cursor: pointer; transition: background 0.15s; border-bottom: 1px solid var(--bg2);
+  }
+  .chat-item:hover { background: var(--bg); }
+  .chat-item.active { background: var(--accent-light); }
+  .chat-avatar {
+    width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
+    background: var(--bg2); display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 700; color: var(--accent);
+    font-family: 'DM Serif Display', serif;
+  }
+  .chat-item-info h5 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+  .chat-item-info p { font-size: 12px; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
+  .chat-time { font-size: 11px; color: var(--text3); margin-left: auto; flex-shrink: 0; }
+  .chat-main {
+    flex: 1; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); display: flex; flex-direction: column; overflow: hidden;
+  }
+  .chat-header {
+    padding: 16px 20px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .chat-header .online-dot { width: 9px; height: 9px; background: var(--green); border-radius: 50%; }
+  .chat-header h4 { font-size: 15px; font-weight: 700; }
+  .chat-header p { font-size: 12px; color: var(--text2); }
+  .chat-messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+  .msg { max-width: 70%; }
+  .msg.sent { align-self: flex-end; }
+  .msg.recv { align-self: flex-start; }
+  .msg-bubble {
+    padding: 10px 14px; border-radius: 14px; font-size: 14px; line-height: 1.5;
+  }
+  .msg.sent .msg-bubble { background: var(--accent); color: white; border-radius: 14px 14px 4px 14px; }
+  .msg.recv .msg-bubble { background: var(--bg2); color: var(--text); border-radius: 14px 14px 14px 4px; }
+  .msg-time { font-size: 11px; color: var(--text3); margin-top: 4px; text-align: right; }
+  .msg.recv .msg-time { text-align: left; }
+  .chat-input-bar { padding: 16px; border-top: 1px solid var(--border); display: flex; gap: 10px; }
+  .chat-input {
+    flex: 1; padding: 11px 16px; border: 1.5px solid var(--border);
+    border-radius: 20px; font-family: 'DM Sans', sans-serif; font-size: 14px;
+    background: var(--bg); color: var(--text); outline: none;
+    transition: border-color 0.2s;
+  }
+  .chat-input:focus { border-color: var(--accent); }
+  .btn-send {
+    padding: 10px 18px; background: var(--accent); color: white;
+    border: none; border-radius: 20px; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600;
+    transition: all 0.2s;
+  }
+  .btn-send:hover { background: var(--accent2); }
+
+  /* DOCTOR DASHBOARD */
+  .notification-list { display: flex; flex-direction: column; gap: 12px; }
+  .notif-item {
+    background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: var(--radius); padding: 18px 20px;
+    display: flex; gap: 14px; align-items: flex-start;
+    transition: all 0.2s;
+  }
+  .notif-item.unread { border-color: var(--accent); background: var(--accent-light); }
+  .notif-icon { font-size: 22px; flex-shrink: 0; }
+  .notif-content h4 { font-size: 14px; font-weight: 700; margin-bottom: 3px; }
+  .notif-content p { font-size: 13px; color: var(--text2); }
+  .notif-actions { margin-top: 10px; display: flex; gap: 8px; }
+  .btn-accept {
+    padding: 7px 16px; border-radius: 7px; border: none;
+    background: var(--green); color: white; font-family: 'DM Sans', sans-serif;
+    font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-decline {
+    padding: 7px 16px; border-radius: 7px; border: 1.5px solid var(--border);
+    background: none; font-family: 'DM Sans', sans-serif;
+    font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; color: var(--text2);
+  }
+  .btn-decline:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-reschedule {
+    padding: 7px 16px; border-radius: 7px; border: 1.5px solid var(--blue);
+    background: var(--blue-light); color: var(--blue); font-family: 'DM Sans', sans-serif;
+    font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+  }
+
+  /* SCHEDULE */
+  .schedule-grid { display: grid; grid-template-columns: auto 1fr; gap: 0; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .time-col { background: var(--bg2); border-right: 1px solid var(--border); }
+  .time-slot-label { height: 56px; display: flex; align-items: center; justify-content: flex-end; padding: 0 14px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text3); border-bottom: 1px solid var(--border); }
+  .sched-col { }
+  .sched-slot { height: 56px; border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 14px; gap: 8px; }
+  .sched-slot-filled { background: var(--accent-light); border-left: 3px solid var(--accent); }
+  .sched-slot-open { }
+  .sched-slot-open:hover { background: var(--green-light); cursor: pointer; }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    display: none; align-items: center; justify-content: center; z-index: 1000;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface); border-radius: 20px;
+    padding: 36px; max-width: 500px; width: 90%;
+    box-shadow: var(--shadow-lg); animation: fadeUp 0.3s ease;
+  }
+  .modal h3 { font-family: 'DM Serif Display', serif; font-size: 22px; margin-bottom: 6px; }
+  .modal p { font-size: 14px; color: var(--text2); margin-bottom: 24px; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 24px; justify-content: flex-end; }
+  .btn-secondary {
+    padding: 10px 20px; border-radius: 8px; border: 1.5px solid var(--border);
+    background: none; font-family: 'DM Sans', sans-serif; font-size: 14px;
+    color: var(--text2); cursor: pointer; transition: all 0.2s;
+  }
+  .btn-secondary:hover { border-color: var(--text2); color: var(--text); }
+
+  /* SECTION */
+  .section-title { font-family: 'DM Serif Display', serif; font-size: 20px; margin-bottom: 16px; }
+  .subsection { margin-bottom: 32px; }
+
+  /* TAB */
+  .tab-bar { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 28px; }
+  .tab-btn {
+    padding: 12px 20px; border: none; background: none; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
+    color: var(--text2); transition: all 0.2s; border-bottom: 2px solid transparent; margin-bottom: -2px;
+  }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 700; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* WRITE RX */
+  .rx-form .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .med-input-row { display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 10px; align-items: end; margin-bottom: 10px; }
+  .btn-add-med {
+    padding: 8px 14px; border-radius: 7px; border: 1.5px dashed var(--border);
+    background: none; font-size: 13px; color: var(--text2); cursor: pointer; transition: all 0.2s;
+  }
+  .btn-add-med:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-danger { background: var(--accent-light); color: var(--accent); border: none; border-radius: 7px; padding: 8px 12px; cursor: pointer; font-size: 13px; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+  /* Responsive help */
+  @media (max-width: 900px) {
+    .dept-grid { grid-template-columns: 1fr 1fr; }
+    .doctor-grid { grid-template-columns: 1fr; }
+    .grid-4 { grid-template-columns: 1fr 1fr; }
+    .chat-container { flex-direction: column; height: auto; }
+    .chat-sidebar { width: 100%; height: 220px; }
+  }
+
+  /* Back button */
+  .btn-back {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 14px; border-radius: 8px; border: 1.5px solid var(--border);
+    background: var(--surface); font-family: 'DM Sans', sans-serif;
+    font-size: 13px; color: var(--text2); cursor: pointer; margin-bottom: 20px;
+    transition: all 0.2s;
+  }
+  .btn-back:hover { border-color: var(--text2); color: var(--text); }
+
+  .empty-state { text-align:center; padding: 60px 20px; color: var(--text3); }
+  .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+  .empty-state p { font-size: 15px; }
+
+  /* Toggle switch */
+  .toggle-wrap { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; }
+  .toggle { position: relative; display: inline-block; width: 44px; height: 24px; }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider {
+    position: absolute; inset: 0; background: var(--border); border-radius: 24px; cursor: pointer; transition: 0.3s;
+  }
+  .toggle-slider:before {
+    content:''; position: absolute; height: 18px; width: 18px;
+    left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.3s;
+  }
+  input:checked + .toggle-slider { background: var(--green); }
+  input:checked + .toggle-slider:before { transform: translateX(20px); }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════ LOGIN ══════════════════ -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="logo-icon">🏥</div>
+      <h1>SRM <span>MedConnect</span></h1>
+    </div>
+    <p class="login-sub">Student Health Portal · SRM Institute of Science & Technology</p>
+    <div class="role-tabs">
+      <button class="role-tab active" onclick="setRole('student')">🎓 Student</button>
+      <button class="role-tab" onclick="setRole('doctor')">👨‍⚕️ Doctor</button>
+    </div>
+    <div class="form-group">
+      <label>SRM Email / ID</label>
+      <input type="text" id="login-email" placeholder="RA2211003010001@srmist.edu.in" value="RA2211003010001@srmist.edu.in"/>
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="login-pass" placeholder="••••••••" value="password123"/>
+    </div>
+    <button class="btn-primary" onclick="doLogin()">Sign In Securely</button>
+    <p class="demo-hint">Demo: Use any credentials above. Select role above to switch views.</p>
+  </div>
+</div>
+
+<!-- ══════════════════ APP ══════════════════ -->
+<div id="app">
+  <!-- NAV -->
+  <nav>
+    <div class="nav-brand">
+      <div class="logo-mark">🏥</div>
+      <h2>SRM <span>MedConnect</span></h2>
+    </div>
+    <div class="nav-links" id="nav-links"></div>
+    <div class="nav-right">
+      <div class="user-chip">
+        <div class="avatar" id="nav-avatar"></div>
+        <span id="nav-name"></span>
+      </div>
+      <button class="btn-logout" onclick="doLogout()">Sign Out</button>
+    </div>
+  </nav>
+
+  <!-- PAGES -->
+  <div class="page-wrapper">
+
+    <!-- ── STUDENT: HOME / DEPARTMENTS ── -->
+    <div class="page" id="page-home">
+      <div class="page-header">
+        <h2>Find a Doctor</h2>
+        <p>Select a department to view available doctors and book your appointment</p>
+      </div>
+      <div class="grid-4" style="margin-bottom:28px;">
+        <div class="stat-card">
+          <div class="stat-label">Doctors Available</div>
+          <div class="stat-value" style="color:var(--green)">12</div>
+          <div class="stat-sub">Currently on duty</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Departments</div>
+          <div class="stat-value">8</div>
+          <div class="stat-sub">Specialisations</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">My Appointments</div>
+          <div class="stat-value" style="color:var(--accent)">2</div>
+          <div class="stat-sub">Upcoming this week</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Avg Wait Time</div>
+          <div class="stat-value" style="color:var(--blue)">8<span style="font-size:18px">min</span></div>
+          <div class="stat-sub">Based on today's data</div>
+        </div>
+      </div>
+      <div class="section-title">Departments</div>
+      <div class="dept-grid" id="dept-grid"></div>
+    </div>
+
+    <!-- ── STUDENT: DOCTORS IN DEPT ── -->
+    <div class="page" id="page-doctors">
+      <button class="btn-back" onclick="showPage('home')">← Back to Departments</button>
+      <div class="page-header">
+        <h2 id="dept-title">Doctors</h2>
+        <p id="dept-subtitle">Select a doctor and choose an available time slot</p>
+      </div>
+      <div class="filter-bar">
+        <div class="search-box">
+          <span class="icon">🔍</span>
+          <input type="text" placeholder="Search doctors..." oninput="filterDoctors(this.value)"/>
+        </div>
+        <select class="filter-select" onchange="filterByAvailability(this.value)">
+          <option value="all">All Availability</option>
+          <option value="available">Available Today</option>
+          <option value="limited">Limited Slots</option>
+        </select>
+      </div>
+      <div class="doctor-grid" id="doctor-grid"></div>
+    </div>
+
+    <!-- ── STUDENT: MY APPOINTMENTS ── -->
+    <div class="page" id="page-appointments">
+      <div class="page-header">
+        <h2>My Appointments</h2>
+        <p>Manage your upcoming and past appointments</p>
+      </div>
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('appt','upcoming',this)">Upcoming</button>
+        <button class="tab-btn" onclick="switchTab('appt','past',this)">Past</button>
+        <button class="tab-btn" onclick="switchTab('appt','cancelled',this)">Cancelled</button>
+      </div>
+      <div class="tab-panel active" id="appt-tab-upcoming">
+        <div class="appt-list" id="upcoming-list"></div>
+      </div>
+      <div class="tab-panel" id="appt-tab-past">
+        <div class="appt-list" id="past-list"></div>
+      </div>
+      <div class="tab-panel" id="appt-tab-cancelled">
+        <div class="empty-state"><div class="icon">🚫</div><p>No cancelled appointments</p></div>
+      </div>
+    </div>
+
+    <!-- ── STUDENT: RECORDS ── -->
+    <div class="page" id="page-records">
+      <div class="page-header">
+        <h2>Health Records</h2>
+        <p>Your prescriptions, booking cards, and medical history</p>
+      </div>
+      <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('rec','prescriptions',this)">Prescriptions</button>
+        <button class="tab-btn" onclick="switchTab('rec','bookings',this)">Booking Cards</button>
+      </div>
+      <div class="tab-panel active" id="rec-tab-prescriptions">
+        <div id="rx-list"></div>
+      </div>
+      <div class="tab-panel" id="rec-tab-bookings">
+        <div id="booking-cards-list" style="display:flex;flex-wrap:wrap;gap:20px;"></div>
+      </div>
+    </div>
+
+    <!-- ── SHARED: CHAT ── -->
+    <div class="page" id="page-chat">
+      <div class="page-header">
+        <h2>Messages</h2>
+        <p>Chat with your doctor for follow-up queries and advice</p>
+      </div>
+      <div class="chat-container">
+        <div class="chat-sidebar">
+          <div class="chat-sidebar-header">Conversations</div>
+          <div class="chat-list" id="chat-list"></div>
+        </div>
+        <div class="chat-main">
+          <div class="chat-header" id="chat-header">
+            <div class="chat-avatar" style="width:38px;height:38px;border-radius:10px;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:18px;" id="chat-doc-avatar">👨‍⚕️</div>
+            <div>
+              <h4 id="chat-doc-name">Select a conversation</h4>
+              <p id="chat-doc-spec">—</p>
+            </div>
+            <div class="online-dot" style="margin-left:auto;"></div>
+          </div>
+          <div class="chat-messages" id="chat-messages">
+            <div class="empty-state"><div class="icon">💬</div><p>Select a conversation to start chatting</p></div>
+          </div>
+          <div class="chat-input-bar">
+            <input class="chat-input" id="chat-input" placeholder="Type your message..." onkeydown="if(event.key==='Enter')sendMessage()"/>
+            <button class="btn-send" onclick="sendMessage()">Send ↑</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── DOCTOR: DASHBOARD ── -->
+    <div class="page" id="page-doc-dashboard">
+      <div class="page-header">
+        <h2>Doctor Dashboard</h2>
+        <p>Today's overview and appointment notifications</p>
+      </div>
+      <div class="grid-4" style="margin-bottom:28px;">
+        <div class="stat-card">
+          <div class="stat-label">Today's Patients</div>
+          <div class="stat-value">7</div>
+          <div class="stat-sub">Confirmed appointments</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Pending Requests</div>
+          <div class="stat-value" style="color:var(--amber)">3</div>
+          <div class="stat-sub">Awaiting approval</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Completed</div>
+          <div class="stat-value" style="color:var(--green)">4</div>
+          <div class="stat-sub">Consultations today</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Availability</div>
+          <div style="margin-top:8px;">
+            <label class="toggle-wrap">
+              <label class="toggle"><input type="checkbox" checked id="doc-avail-toggle" onchange="toggleAvailability()"><span class="toggle-slider"></span></label>
+              <span id="avail-label" style="color:var(--green);font-weight:600;">Available</span>
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="subsection">
+          <div class="section-title">New Appointment Requests</div>
+          <div class="notification-list" id="notif-list"></div>
+        </div>
+        <div class="subsection">
+          <div class="section-title">Today's Schedule</div>
+          <div id="doc-schedule"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── DOCTOR: PATIENTS ── -->
+    <div class="page" id="page-doc-patients">
+      <div class="page-header">
+        <h2>My Patients</h2>
+        <p>All confirmed appointments and patient records</p>
+      </div>
+      <div class="appt-list" id="doc-patients-list"></div>
+    </div>
+
+    <!-- ── DOCTOR: WRITE PRESCRIPTION ── -->
+    <div class="page" id="page-doc-prescription">
+      <div class="page-header">
+        <h2>Write Prescription</h2>
+        <p>Issue a prescription or consultation note for a patient</p>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 380px;gap:28px;align-items:start;">
+        <div class="card">
+          <div class="card-body">
+            <div class="rx-form">
+              <div class="form-row" style="margin-bottom:16px;">
+                <div class="form-group" style="margin:0;">
+                  <label>Patient Name</label>
+                  <input type="text" placeholder="Enter patient name" id="rx-patient-name" value="Arjun Menon"/>
+                </div>
+                <div class="form-group" style="margin:0;">
+                  <label>Registration No.</label>
+                  <input type="text" placeholder="RA2211003010001" id="rx-patient-reg" value="RA2211003010001"/>
+                </div>
+              </div>
+              <div class="form-row" style="margin-bottom:16px;">
+                <div class="form-group" style="margin:0;">
+                  <label>Diagnosis</label>
+                  <input type="text" placeholder="Primary diagnosis" id="rx-diagnosis" value="Acute Pharyngitis"/>
+                </div>
+                <div class="form-group" style="margin:0;">
+                  <label>Date</label>
+                  <input type="date" id="rx-date"/>
+                </div>
+              </div>
+              <div style="margin-bottom:16px;">
+                <label style="font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Medications</label>
+                <div id="meds-list">
+                  <div class="med-input-row">
+                    <div class="form-group" style="margin:0;"><label style="font-size:11px;color:var(--text3);">Medicine</label><input type="text" placeholder="Medicine name" value="Amoxicillin 500mg"/></div>
+                    <div class="form-group" style="margin:0;"><label style="font-size:11px;color:var(--text3);">Dosage</label><input type="text" placeholder="e.g. 1-0-1" value="1-0-1"/></div>
+                    <div class="form-group" style="margin:0;"><label style="font-size:11px;color:var(--text3);">Duration</label><input type="text" placeholder="5 days" value="5 days"/></div>
+                    <button class="btn-danger" onclick="this.closest('.med-input-row').remove()">✕</button>
+                  </div>
+                  <div class="med-input-row">
+                    <div class="form-group" style="margin:0;"><input type="text" placeholder="Medicine name" value="Paracetamol 650mg"/></div>
+                    <div class="form-group" style="margin:0;"><input type="text" placeholder="e.g. 0-1-1" value="0-1-1"/></div>
+                    <div class="form-group" style="margin:0;"><input type="text" placeholder="3 days" value="3 days"/></div>
+                    <button class="btn-danger" onclick="this.closest('.med-input-row').remove()">✕</button>
+                  </div>
+                </div>
+                <button class="btn-add-med" onclick="addMedRow()">+ Add Medication</button>
+              </div>
+              <div class="form-group">
+                <label>Notes & Instructions</label>
+                <textarea style="width:100%;padding:12px 16px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;resize:vertical;min-height:80px;outline:none;background:var(--surface);" placeholder="Rest well, drink plenty of fluids. Avoid cold foods.">Rest well, drink plenty of fluids. Avoid cold foods and beverages. Return if fever persists beyond 3 days.</textarea>
+              </div>
+              <div class="modal-actions" style="margin-top:0;">
+                <button class="btn-secondary" onclick="clearRxForm()">Clear</button>
+                <button class="btn-primary" style="width:auto;padding:11px 28px;" onclick="issueRx()">Issue Prescription</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Live preview -->
+        <div id="rx-preview">
+          <!-- populated by JS -->
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /page-wrapper -->
+</div><!-- /app -->
+
+<!-- ── BOOKING MODAL ── -->
+<div class="modal-overlay" id="booking-modal">
+  <div class="modal">
+    <h3>Confirm Appointment</h3>
+    <p id="modal-desc">You are booking an appointment with the selected doctor.</p>
+    <div class="form-group">
+      <label>Reason for Visit</label>
+      <input type="text" id="modal-reason" placeholder="Brief description of your concern"/>
+    </div>
+    <div class="form-group">
+      <label>Additional Notes</label>
+      <input type="text" id="modal-notes" placeholder="Any allergies, ongoing medications..."/>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" style="width:auto;padding:11px 24px;" onclick="confirmBooking()">Book Appointment</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── SUCCESS MODAL ── -->
+<div class="modal-overlay" id="success-modal">
+  <div class="modal" style="text-align:center;">
+    <div style="font-size:52px;margin-bottom:12px;">✅</div>
+    <h3>Appointment Confirmed!</h3>
+    <p>Your booking has been confirmed. Show this ID at the clinic.</p>
+    <div style="background:var(--bg2);border-radius:10px;padding:16px;margin:16px 0;font-family:'JetBrains Mono',monospace;font-size:18px;color:var(--accent);letter-spacing:2px;" id="booking-id-display">—</div>
+    <div class="modal-actions" style="justify-content:center;">
+      <button class="btn-secondary" onclick="document.getElementById('success-modal').classList.remove('open')">Close</button>
+      <button class="btn-primary" style="width:auto;padding:11px 24px;" onclick="goToReceipt()">View Receipt →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════
+const DEPARTMENTS = [
+  { id:'general', name:'General Medicine', icon:'🩺', desc:'Primary care, fever, flu & general health', doctors:3, available:true },
+  { id:'dental', name:'Dental Clinic', icon:'🦷', desc:'Oral health, teeth cleaning, fillings', doctors:2, available:true },
+  { id:'mental', name:'Counselling & Mental Health', icon:'🧠', desc:'Stress, anxiety, depression support', doctors:2, available:false },
+  { id:'ortho', name:'Orthopaedics', icon:'🦴', desc:'Bone, joint & sports injuries', doctors:2, available:true },
+  { id:'eye', name:'Ophthalmology', icon:'👁️', desc:'Eye care, vision testing, infections', doctors:1, available:true },
+  { id:'ent', name:'ENT', icon:'👂', desc:'Ear, nose & throat specialist', doctors:2, available:false },
+  { id:'derma', name:'Dermatology', icon:'🧴', desc:'Skin issues, acne, rashes, infections', doctors:1, available:true },
+  { id:'gynaec', name:'Gynaecology', icon:'🌸', desc:'Women\'s health, reproductive care', doctors:1, available:true },
+];
+
+const DOCTORS = {
+  general: [
+    { id:'d1', name:'Dr. Priya Suresh', spec:'MBBS, MD – General Physician', exp:'12 yrs', rating:'4.9', slots:['09:00','09:30','10:30','11:00','02:00','03:00'], booked:['09:30','11:00'] },
+    { id:'d2', name:'Dr. Ramesh Kumar', spec:'MBBS – General Physician', exp:'8 yrs', rating:'4.7', slots:['09:00','10:00','10:30','11:30','02:30','04:00'], booked:['09:00','10:00'] },
+    { id:'d3', name:'Dr. Kavitha Nair', spec:'MBBS, MD – Internal Medicine', exp:'15 yrs', rating:'4.8', slots:['08:30','09:30','01:00','01:30','03:30'], booked:['08:30'] },
+  ],
+  dental: [
+    { id:'d4', name:'Dr. Arun Mathew', spec:'BDS, MDS – Dental Surgeon', exp:'10 yrs', rating:'4.8', slots:['09:00','10:00','11:00','01:00','02:00'], booked:['11:00'] },
+    { id:'d5', name:'Dr. Sneha Pillai', spec:'BDS – Dentist', exp:'6 yrs', rating:'4.6', slots:['09:30','10:30','02:30','03:30'], booked:[] },
+  ],
+  mental: [
+    { id:'d6', name:'Dr. Meera Krishnan', spec:'MBBS, MD – Psychiatry', exp:'14 yrs', rating:'5.0', slots:['10:00','11:00','02:00','03:00'], booked:['10:00','11:00','02:00','03:00'] },
+    { id:'d7', name:'Ms. Divya Rajan', spec:'M.Sc Psychology – Counsellor', exp:'7 yrs', rating:'4.9', slots:['09:00','10:00','11:00','01:00','02:00','03:00'], booked:['09:00','11:00'] },
+  ],
+  ortho: [
+    { id:'d8', name:'Dr. Suresh Babu', spec:'MBBS, MS – Orthopaedics', exp:'18 yrs', rating:'4.9', slots:['09:00','10:00','11:00','01:00'], booked:['09:00'] },
+    { id:'d9', name:'Dr. Anitha Roy', spec:'MBBS – Ortho Resident', exp:'4 yrs', rating:'4.5', slots:['02:00','03:00','04:00'], booked:[] },
+  ],
+  eye: [
+    { id:'d10', name:'Dr. Venkat Raman', spec:'MBBS, MS – Ophthalmology', exp:'16 yrs', rating:'4.8', slots:['09:00','10:30','12:00','02:00','03:30'], booked:['09:00','10:30'] },
+  ],
+  ent: [
+    { id:'d11', name:'Dr. Lalitha Menon', spec:'MBBS, MS – ENT Specialist', exp:'11 yrs', rating:'4.7', slots:['10:00','11:00','02:00','03:00'], booked:['10:00','11:00','02:00','03:00'] },
+    { id:'d12', name:'Dr. Kiran S.', spec:'MBBS – ENT Resident', exp:'3 yrs', rating:'4.4', slots:['09:30','10:30','01:30'], booked:['09:30','10:30','01:30'] },
+  ],
+  derma: [
+    { id:'d13', name:'Dr. Pooja Chandran', spec:'MBBS, MD – Dermatology', exp:'9 yrs', rating:'4.9', slots:['09:00','10:00','11:00','02:00','03:00'], booked:['09:00'] },
+  ],
+  gynaec: [
+    { id:'d14', name:'Dr. Saranya Bose', spec:'MBBS, MS – OB/GYN', exp:'13 yrs', rating:'5.0', slots:['09:00','10:00','11:00','01:00','02:00'], booked:['09:00','11:00'] },
+  ],
+};
+
+const UPCOMING_APPTS = [
+  { id:'APT2024001', doctor:'Dr. Priya Suresh', dept:'General Medicine', date:'21', month:'Mar', time:'10:30 AM', status:'confirmed', reason:'Fever & Cold' },
+  { id:'APT2024002', doctor:'Dr. Arun Mathew', dept:'Dental Clinic', date:'25', month:'Mar', time:'09:00 AM', status:'pending', reason:'Tooth Pain' },
+];
+const PAST_APPTS = [
+  { id:'APT2024000', doctor:'Dr. Kavitha Nair', dept:'General Medicine', date:'14', month:'Mar', time:'01:30 PM', status:'confirmed', reason:'Routine Check' },
+];
+
+const DOC_NOTIFS = [
+  { id:'n1', student:'Arjun Menon', reg:'RA2211003010001', time:'09:00 AM Today', reason:'Fever & headache', unread:true },
+  { id:'n2', student:'Preethi Lakshmi', reg:'RA2211003010087', time:'10:30 AM Today', reason:'Follow-up consultation', unread:true },
+  { id:'n3', student:'Vikram Chandran', reg:'RA2211003010042', time:'02:00 PM Today', reason:'Back pain', unread:false },
+];
+
+const CHAT_CONTACTS_STUDENT = [
+  { id:'c1', name:'Dr. Priya Suresh', spec:'General Medicine', avatar:'P', lastMsg:'Please drink warm fluids and rest well.', time:'10:32 AM', msgs:[
+    { from:'doc', text:'Hello! How are you feeling today?', time:'10:20 AM' },
+    { from:'me', text:'I have been having fever since yesterday evening, around 101°F.', time:'10:22 AM' },
+    { from:'doc', text:'I see. Are you experiencing any body ache or sore throat along with the fever?', time:'10:24 AM' },
+    { from:'me', text:'Yes, sore throat and slight body ache.', time:'10:26 AM' },
+    { from:'doc', text:'Please drink warm fluids and rest well. I will prescribe something at your appointment tomorrow.', time:'10:32 AM' },
+  ]},
+  { id:'c2', name:'Dr. Arun Mathew', spec:'Dental Clinic', avatar:'A', lastMsg:'Avoid very cold/hot foods before your visit.', time:'Yesterday', msgs:[
+    { from:'doc', text:'Hi! Saw your appointment booking for tooth pain. How long has it been?', time:'Yesterday 3:00 PM' },
+    { from:'me', text:'About 2 days. The pain is on the upper left side.', time:'Yesterday 3:05 PM' },
+    { from:'doc', text:'Avoid very cold/hot foods before your visit. See you on the 25th!', time:'Yesterday 3:10 PM' },
+  ]},
+];
+
+const CHAT_CONTACTS_DOCTOR = [
+  { id:'s1', name:'Arjun Menon', spec:'RA2211003010001 · CSE', avatar:'A', lastMsg:'Thank you doctor.', time:'10:40 AM', msgs:[
+    { from:'me', text:'Hello Arjun! How are you feeling today?', time:'10:20 AM' },
+    { from:'doc', text:'I have been having fever since yesterday evening, around 101°F.', time:'10:22 AM' },
+    { from:'me', text:'Are you experiencing body ache as well?', time:'10:24 AM' },
+    { from:'doc', text:'Yes, sore throat and slight body ache.', time:'10:26 AM' },
+    { from:'me', text:'Drink warm fluids and rest. I will see you at your appointment.', time:'10:32 AM' },
+    { from:'doc', text:'Thank you doctor.', time:'10:40 AM' },
+  ]},
+  { id:'s2', name:'Preethi Lakshmi', spec:'RA2211003010087 · ECE', avatar:'P', lastMsg:'Got it, I will follow the prescription.', time:'Yesterday', msgs:[
+    { from:'me', text:'Hi Preethi! How is the medication working?', time:'Yesterday 2:00 PM' },
+    { from:'doc', text:'Much better today, thank you!', time:'Yesterday 2:15 PM' },
+    { from:'me', text:'Good. Continue the course for 5 days as prescribed.', time:'Yesterday 2:20 PM' },
+    { from:'doc', text:'Got it, I will follow the prescription.', time:'Yesterday 2:25 PM' },
+  ]},
+];
+
+const PRESCRIPTIONS = [
+  {
+    id:'RX2024001', date:'14 Mar 2025', doctor:'Dr. Kavitha Nair', dept:'General Medicine',
+    patient:'Arjun Menon', reg:'RA2211003010001', diagnosis:'Acute Pharyngitis',
+    meds:[
+      { name:'Amoxicillin 500mg', dose:'1-0-1 after meals', dur:'5 days' },
+      { name:'Paracetamol 650mg', dose:'0-1-1 (if fever)', dur:'3 days' },
+      { name:'Betadine Gargle', dose:'Twice daily', dur:'7 days' },
+    ],
+    notes:'Rest well. Drink plenty of warm fluids. Return if fever persists beyond 3 days.'
+  }
+];
+
+// STATE
+let currentRole = 'student';
+let currentUser = {};
+let selectedDept = null;
+let selectedDoctor = null;
+let selectedSlot = null;
+let pendingBooking = {};
+let lastBookingId = '';
+let activeChatId = null;
+let chatContacts = [];
+
+// ═══════════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════════
+function setRole(role) {
+  currentRole = role;
+  document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.role-tab').forEach((t,i) => { if((i===0&&role==='student')||(i===1&&role==='doctor')) t.classList.add('active'); });
+  document.getElementById('login-email').value = role === 'student' ? 'RA2211003010001@srmist.edu.in' : 'dr.priya@srmist.edu.in';
+}
+
+function doLogin() {
+  const email = document.getElementById('login-email').value;
+  if (!email) return;
+  if (currentRole === 'student') {
+    currentUser = { name:'Arjun Menon', initials:'AM', role:'student', dept:'CSE – III Year' };
+    chatContacts = CHAT_CONTACTS_STUDENT;
+  } else {
+    currentUser = { name:'Dr. Priya Suresh', initials:'PS', role:'doctor', dept:'General Medicine' };
+    chatContacts = CHAT_CONTACTS_DOCTOR;
+  }
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  buildNav();
+  initApp();
+}
+
+function doLogout() {
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+}
+
+// ═══════════════════════════════════════════════════
+// NAV
+// ═══════════════════════════════════════════════════
+function buildNav() {
+  document.getElementById('nav-avatar').textContent = currentUser.initials;
+  document.getElementById('nav-name').textContent = currentUser.name;
+  const links = currentRole === 'student' ? [
+    { id:'home', label:'🏥 Find Doctor' },
+    { id:'appointments', label:'📅 Appointments', badge:true },
+    { id:'records', label:'📋 My Records' },
+    { id:'chat', label:'💬 Messages', badge:true },
+  ] : [
+    { id:'doc-dashboard', label:'📊 Dashboard', badge:true },
+    { id:'doc-patients', label:'👥 My Patients' },
+    { id:'doc-prescription', label:'📝 Prescriptions' },
+    { id:'chat', label:'💬 Messages', badge:true },
+  ];
+  const nav = document.getElementById('nav-links');
+  nav.innerHTML = links.map(l => `
+    <button class="nav-link" onclick="showPage('${l.id}')" id="nav-${l.id}">
+      ${l.label}
+      ${l.badge ? '<span class="badge"></span>' : ''}
+    </button>
+  `).join('');
+}
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+  const pageEl = document.getElementById('page-' + id);
+  if (pageEl) pageEl.classList.add('active');
+  const navEl = document.getElementById('nav-' + id);
+  if (navEl) navEl.classList.add('active');
+}
+
+// ═══════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════
+function initApp() {
+  // Set today's date for prescription form
+  const today = new Date().toISOString().split('T')[0];
+  const rxDateEl = document.getElementById('rx-date');
+  if (rxDateEl) rxDateEl.value = today;
+
+  if (currentRole === 'student') {
+    buildDeptGrid();
+    buildAppointments();
+    buildRecords();
+    buildChat();
+    showPage('home');
+  } else {
+    buildDocDashboard();
+    buildDocPatients();
+    buildChat();
+    buildRxPreview();
+    showPage('doc-dashboard');
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// DEPARTMENTS
+// ═══════════════════════════════════════════════════
+function buildDeptGrid() {
+  const grid = document.getElementById('dept-grid');
+  grid.innerHTML = DEPARTMENTS.map(d => {
+    const avail = d.available ? `<span class="dept-badge badge-green"><span class="dot dot-green"></span> Available</span>` : `<span class="dept-badge badge-red"><span class="dot dot-red"></span> Fully Booked</span>`;
+    return `
+      <div class="dept-card" onclick="openDept('${d.id}')">
+        <div class="dept-icon">${d.icon}</div>
+        <div class="dept-name">${d.name}</div>
+        <div class="dept-info">${d.desc}</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:6px;">${d.doctors} doctor${d.doctors>1?'s':''} on duty</div>
+        ${avail}
+      </div>
+    `;
+  }).join('');
+}
+
+function openDept(id) {
+  selectedDept = id;
+  const dept = DEPARTMENTS.find(d => d.id === id);
+  document.getElementById('dept-title').textContent = dept.icon + ' ' + dept.name;
+  document.getElementById('dept-subtitle').textContent = dept.desc;
+  buildDoctorGrid(id);
+  showPage('doctors');
+}
+
+function buildDoctorGrid(deptId, filter='') {
+  const docs = (DOCTORS[deptId] || []).filter(d => !filter || d.name.toLowerCase().includes(filter.toLowerCase()));
+  const grid = document.getElementById('doctor-grid');
+  if (!docs.length) { grid.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><p>No doctors found</p></div>'; return; }
+  grid.innerHTML = docs.map(d => {
+    const freeSlots = d.slots.filter(s => !d.booked.includes(s));
+    const availBadge = freeSlots.length > 3 ? `<span class="dept-badge badge-green">🟢 ${freeSlots.length} slots available</span>` :
+                       freeSlots.length > 0 ? `<span class="dept-badge badge-amber">🟡 ${freeSlots.length} slot${freeSlots.length>1?'s':''} left</span>` :
+                       `<span class="dept-badge badge-red">🔴 Fully booked</span>`;
+    const slotsHtml = d.slots.map(s => `<div class="slot ${d.booked.includes(s)?'booked':''}" onclick="selectSlot(this,'${d.id}','${s}')">${s}</div>`).join('');
+    return `
+      <div class="doctor-card" id="dc-${d.id}">
+        <div class="doctor-header">
+          <div class="doctor-avatar">${d.name.split(' ').map(w=>w[0]).join('').slice(0,2)}</div>
+          <div class="doctor-info">
+            <h4>${d.name}</h4>
+            <div class="spec">${d.spec}</div>
+            <div style="font-size:12px;color:var(--text2);">⭐ ${d.rating} · ${d.exp} experience</div>
+          </div>
+        </div>
+        ${availBadge}
+        <div class="available-slots" style="margin-top:12px;">
+          <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;">Select Time Slot</div>
+          <div class="slots">${slotsHtml}</div>
+        </div>
+        <button class="btn-book" id="btn-book-${d.id}" disabled onclick="openBookingModal('${d.id}')">
+          Select a slot to book
+        </button>
+      </div>
+    `;
+  }).join('');
+}
+
+function selectSlot(el, docId, slot) {
+  if (el.classList.contains('booked')) return;
+  // Deselect others in same card
+  el.closest('.doctor-card').querySelectorAll('.slot').forEach(s => s.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedDoctor = docId;
+  selectedSlot = slot;
+  const btn = document.getElementById('btn-book-' + docId);
+  btn.disabled = false;
+  btn.textContent = `Book ${slot} →`;
+  // Disable other cards' book buttons
+  document.querySelectorAll('.btn-book').forEach(b => { if(b.id !== 'btn-book-'+docId) { b.disabled = true; b.textContent = 'Select a slot to book'; } });
+}
+
+function filterDoctors(val) { buildDoctorGrid(selectedDept, val); }
+function filterByAvailability(val) { buildDoctorGrid(selectedDept); }
+
+// ═══════════════════════════════════════════════════
+// BOOKING
+// ═══════════════════════════════════════════════════
+function openBookingModal(docId) {
+  const dept = DEPARTMENTS.find(d => d.id === selectedDept);
+  const doc = (DOCTORS[selectedDept]||[]).find(d => d.id === docId);
+  if (!doc || !selectedSlot) return;
+  pendingBooking = { docId, doc, dept, slot: selectedSlot };
+  document.getElementById('modal-desc').textContent = `Booking with ${doc.name} (${dept.name}) at ${selectedSlot}`;
+  document.getElementById('booking-modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('booking-modal').classList.remove('open');
+}
+
+function generateId() {
+  return 'APT' + Date.now().toString().slice(-7);
+}
+
+function confirmBooking() {
+  const reason = document.getElementById('modal-reason').value || 'General Consultation';
+  const id = generateId();
+  lastBookingId = id;
+  // Add to upcoming
+  const now = new Date();
+  UPCOMING_APPTS.unshift({
+    id, doctor: pendingBooking.doc.name, dept: pendingBooking.dept.name,
+    date: (now.getDate()+1).toString(), month: now.toLocaleString('default',{month:'short'}),
+    time: pendingBooking.slot + ' AM', status:'pending', reason
+  });
+  // Mark slot as booked
+  const docData = DOCTORS[selectedDept].find(d => d.id === pendingBooking.docId);
+  if (docData) docData.booked.push(pendingBooking.slot);
+  closeModal();
+  document.getElementById('booking-id-display').textContent = id;
+  document.getElementById('success-modal').classList.add('open');
+  buildAppointments();
+}
+
+function goToReceipt() {
+  document.getElementById('success-modal').classList.remove('open');
+  buildRecords();
+  showPage('records');
+  // Switch to bookings tab
+  setTimeout(() => switchTabDirect('rec','bookings'), 100);
+}
+
+// ═══════════════════════════════════════════════════
+// APPOINTMENTS
+// ═══════════════════════════════════════════════════
+function buildAppointments() {
+  const upEl = document.getElementById('upcoming-list');
+  const pastEl = document.getElementById('past-list');
+  upEl.innerHTML = UPCOMING_APPTS.map(a => apptItemHTML(a, true)).join('') || '<div class="empty-state"><div class="icon">📅</div><p>No upcoming appointments</p></div>';
+  pastEl.innerHTML = PAST_APPTS.map(a => apptItemHTML(a, false)).join('') || '<div class="empty-state"><div class="icon">📅</div><p>No past appointments</p></div>';
+}
+
+function apptItemHTML(a, upcoming) {
+  return `
+    <div class="appt-item">
+      <div class="appt-date-block">
+        <div class="day">${a.date}</div>
+        <div class="month">${a.month}</div>
+      </div>
+      <div class="appt-details">
+        <h4>${a.doctor}</h4>
+        <div class="meta">${a.dept} · ${a.reason}</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);margin-top:2px;">${a.id}</div>
+      </div>
+      <div class="appt-time">${a.time}</div>
+      <span class="status-badge status-${a.status}">${a.status.charAt(0).toUpperCase()+a.status.slice(1)}</span>
+      ${upcoming ? `<button class="btn-sm danger" onclick="cancelAppt('${a.id}')">Cancel</button>` : ''}
+      ${upcoming ? `<button class="btn-sm" onclick="viewReceipt('${a.id}')">Receipt</button>` : ''}
+    </div>
+  `;
+}
+
+function cancelAppt(id) {
+  const i = UPCOMING_APPTS.findIndex(a => a.id === id);
+  if (i > -1) UPCOMING_APPTS.splice(i, 1);
+  buildAppointments();
+}
+
+function viewReceipt(id) {
+  lastBookingId = id;
+  buildRecords();
+  showPage('records');
+  setTimeout(() => switchTabDirect('rec','bookings'), 100);
+}
+
+// ═══════════════════════════════════════════════════
+// RECORDS
+// ═══════════════════════════════════════════════════
+function buildRecords() {
+  buildRxList();
+  buildBookingCards();
+}
+
+function buildRxList() {
+  const el = document.getElementById('rx-list');
+  el.innerHTML = PRESCRIPTIONS.map(rx => rxCardHTML(rx)).join('');
+  // Add newly issued ones
+}
+
+function rxCardHTML(rx) {
+  return `
+    <div class="rx-card" style="margin-bottom:20px;">
+      <div class="rx-header">
+        <div>
+          <h3>Prescription</h3>
+          <div class="rx-date">${rx.date} · ${rx.dept}</div>
+          <div style="margin-top:6px;font-size:13px;opacity:0.8;">Dr. ${rx.doctor.replace('Dr. ','')}</div>
+        </div>
+        <div class="rx-symbol">℞</div>
+      </div>
+      <div class="rx-body">
+        <div class="rx-patient">
+          <div class="field"><label>Patient</label><span>${rx.patient}</span></div>
+          <div class="field"><label>Reg. No.</label><span>${rx.reg}</span></div>
+          <div class="field"><label>Diagnosis</label><span>${rx.diagnosis}</span></div>
+          <div class="field"><label>Rx ID</label><span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--accent);">${rx.id}</span></div>
+        </div>
+        <div class="rx-meds">
+          <h4>Medications</h4>
+          ${rx.meds.map((m,i) => `
+            <div class="med-row">
+              <div class="med-num">${i+1}</div>
+              <div>
+                <div class="med-name">${m.name}</div>
+                <div class="med-dose">${m.dose} · ${m.dur}</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        <div class="rx-notes">⚠️ ${rx.notes}</div>
+      </div>
+      <div class="rx-footer">
+        <div>
+          <div style="font-size:12px;color:var(--text3);">Prescribed by</div>
+          <div class="doc-sig">${rx.doctor}</div>
+        </div>
+        <button class="btn-sm" onclick="window.print()">🖨️ Print</button>
+      </div>
+    </div>
+  `;
+}
+
+function buildBookingCards() {
+  const el = document.getElementById('booking-cards-list');
+  const allAppts = [...UPCOMING_APPTS, ...PAST_APPTS];
+  el.innerHTML = allAppts.map(a => bookingCardHTML(a)).join('');
+}
+
+function bookingCardHTML(a) {
+  const qr = a.id.replace('APT','');
+  return `
+    <div class="booking-card">
+      <div class="booking-card-header">
+        <div class="logo">SRM <span>MedConnect</span></div>
+        <div style="font-size:12px;opacity:0.6;margin-top:2px;">Student Health Services</div>
+        <div style="font-size:12px;margin-top:10px;opacity:0.8;">APPOINTMENT CARD</div>
+      </div>
+      <div class="booking-card-body">
+        <div class="bk-row"><div><div class="bk-label">Patient</div><div class="bk-value">${currentUser.name}</div></div></div>
+        <div class="bk-row"><div><div class="bk-label">Doctor</div><div class="bk-value">${a.doctor}</div></div></div>
+        <div class="bk-row">
+          <div><div class="bk-label">Department</div><div class="bk-value" style="font-size:13px;">${a.dept}</div></div>
+          <div style="text-align:right;"><div class="bk-label">Date</div><div class="bk-value">${a.date} ${a.month}</div></div>
+        </div>
+        <div class="bk-row">
+          <div><div class="bk-label">Time</div><div class="bk-value">${a.time}</div></div>
+          <div style="text-align:right;"><div class="bk-label">Status</div><div class="bk-value" style="color:${a.status==='confirmed'?'var(--green)':'var(--amber)'};">${a.status.toUpperCase()}</div></div>
+        </div>
+        <div class="bk-qr">
+          <div class="qr-mock">
+            ▄▀▄<br>▀█▀<br>▄▀▄<br>${qr.slice(0,6)}
+          </div>
+        </div>
+        <hr class="bk-divider"/>
+        <div style="text-align:center;">
+          <div style="font-size:11px;color:var(--text3);margin-bottom:4px;">BOOKING ID</div>
+          <div class="booking-id">${a.id}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:8px;">Show this at the clinic reception</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════════════
+// CHAT
+// ═══════════════════════════════════════════════════
+function buildChat() {
+  const listEl = document.getElementById('chat-list');
+  listEl.innerHTML = chatContacts.map(c => `
+    <div class="chat-item" onclick="openChat('${c.id}')" id="chat-item-${c.id}">
+      <div class="chat-avatar">${c.avatar}</div>
+      <div class="chat-item-info">
+        <h5>${c.name}</h5>
+        <p>${c.lastMsg}</p>
+      </div>
+      <div class="chat-time">${c.time}</div>
+    </div>
+  `).join('');
+}
+
+function openChat(id) {
+  activeChatId = id;
+  const contact = chatContacts.find(c => c.id === id);
+  if (!contact) return;
+  document.querySelectorAll('.chat-item').forEach(i => i.classList.remove('active'));
+  document.getElementById('chat-item-'+id)?.classList.add('active');
+  document.getElementById('chat-doc-name').textContent = contact.name;
+  document.getElementById('chat-doc-spec').textContent = contact.spec;
+  document.getElementById('chat-doc-avatar').textContent = contact.avatar;
+  const msgsEl = document.getElementById('chat-messages');
+  msgsEl.innerHTML = contact.msgs.map(m => {
+    const isSent = (currentRole==='student' && m.from==='me') || (currentRole==='doctor' && m.from==='me');
+    return `
+      <div class="msg ${isSent?'sent':'recv'}">
+        <div class="msg-bubble">${m.text}</div>
+        <div class="msg-time">${m.time}</div>
+      </div>
+    `;
+  }).join('');
+  msgsEl.scrollTop = msgsEl.scrollHeight;
+}
+
+function sendMessage() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text || !activeChatId) return;
+  const contact = chatContacts.find(c => c.id === activeChatId);
+  if (!contact) return;
+  const now = new Date().toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit'});
+  contact.msgs.push({ from:'me', text, time: now });
+  contact.lastMsg = text;
+  contact.time = now;
+  input.value = '';
+  openChat(activeChatId);
+  buildChat();
+  // Simulate reply
+  setTimeout(() => {
+    const replies = [
+      'Thank you for sharing. Let me check on that.',
+      'I understand. Please make sure to follow the prescribed routine.',
+      'That sounds like a concern we should discuss at your appointment.',
+      'Got it! Is there anything else you\'d like to know?',
+      'Please come in and we can do a proper examination.'
+    ];
+    const reply = replies[Math.floor(Math.random()*replies.length)];
+    contact.msgs.push({ from:'doc', text:reply, time: new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}) });
+    contact.lastMsg = reply;
+    if (activeChatId === contact.id) openChat(activeChatId);
+    buildChat();
+  }, 1200);
+}
+
+// ═══════════════════════════════════════════════════
+// DOCTOR DASHBOARD
+// ═══════════════════════════════════════════════════
+function buildDocDashboard() {
+  const notifEl = document.getElementById('notif-list');
+  notifEl.innerHTML = DOC_NOTIFS.map(n => `
+    <div class="notif-item ${n.unread?'unread':''}" id="notif-${n.id}">
+      <div class="notif-icon">${n.unread?'🔔':'📋'}</div>
+      <div class="notif-content">
+        <h4>${n.student} <span style="font-size:12px;font-weight:400;color:var(--text3);">${n.reg}</span></h4>
+        <p>${n.time} · <em>${n.reason}</em></p>
+        <div class="notif-actions">
+          <button class="btn-accept" onclick="acceptAppt('${n.id}')">✓ Accept</button>
+          <button class="btn-reschedule" onclick="rescheduleAppt('${n.id}')">⟳ Reschedule</button>
+          <button class="btn-decline" onclick="declineAppt('${n.id}')">✕ Decline</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+  buildDocSchedule();
+}
+
+function buildDocSchedule() {
+  const times = ['08:30','09:00','09:30','10:00','10:30','11:00','11:30','12:00','01:00','01:30','02:00','02:30','03:00','03:30','04:00'];
+  const booked = { '09:00':'Arjun Menon', '10:30':'Preethi Lakshmi', '02:00':'Vikram Chandran' };
+  const el = document.getElementById('doc-schedule');
+  el.innerHTML = `
+    <div class="schedule-grid">
+      <div class="time-col">
+        ${times.map(t => `<div class="time-slot-label">${t}</div>`).join('')}
+      </div>
+      <div class="sched-col">
+        ${times.map(t => {
+          if (booked[t]) return `<div class="sched-slot sched-slot-filled"><span style="font-size:12px;font-weight:600;color:var(--accent);">${t}</span> <span style="font-size:13px;">${booked[t]}</span></div>`;
+          return `<div class="sched-slot sched-slot-open" onclick="alert('Slot ${t} is currently open. You can mark it unavailable.')"><span style="font-size:12px;color:var(--text3);">${t}</span><span style="font-size:11px;color:var(--green);margin-left:8px;">Open</span></div>`;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function acceptAppt(id) {
+  const el = document.getElementById('notif-'+id);
+  if(el) { el.classList.remove('unread'); el.querySelector('.notif-actions').innerHTML = '<span style="color:var(--green);font-size:13px;font-weight:600;">✓ Accepted</span>'; }
+}
+function declineAppt(id) {
+  const el = document.getElementById('notif-'+id);
+  if(el) el.remove();
+}
+function rescheduleAppt(id) {
+  const newTime = prompt('Enter new time (e.g. 11:30 AM):');
+  if (newTime) {
+    const el = document.getElementById('notif-'+id);
+    if(el) {
+      const meta = el.querySelector('p');
+      meta.textContent = 'Rescheduled to: ' + newTime + ' · ' + meta.textContent.split('·')[1];
+      el.querySelector('.notif-actions').innerHTML = '<span style="color:var(--blue);font-size:13px;font-weight:600;">⟳ Rescheduled to '+newTime+'</span>';
+    }
+  }
+}
+
+function toggleAvailability() {
+  const on = document.getElementById('doc-avail-toggle').checked;
+  document.getElementById('avail-label').textContent = on ? 'Available' : 'Unavailable';
+  document.getElementById('avail-label').style.color = on ? 'var(--green)' : 'var(--accent)';
+}
+
+// ═══════════════════════════════════════════════════
+// DOC PATIENTS
+// ═══════════════════════════════════════════════════
+function buildDocPatients() {
+  const list = [
+    { id:'APT001', student:'Arjun Menon', reg:'RA2211003010001', dept:'General Medicine', date:'21', month:'Mar', time:'09:00 AM', status:'confirmed', reason:'Fever & headache' },
+    { id:'APT002', student:'Preethi Lakshmi', reg:'RA2211003010087', dept:'General Medicine', date:'21', month:'Mar', time:'10:30 AM', status:'confirmed', reason:'Follow-up' },
+    { id:'APT003', student:'Vikram Chandran', reg:'RA2211003010042', dept:'General Medicine', date:'21', month:'Mar', time:'02:00 PM', status:'pending', reason:'Back pain' },
+  ];
+  const el = document.getElementById('doc-patients-list');
+  el.innerHTML = list.map(a => `
+    <div class="appt-item">
+      <div class="appt-date-block"><div class="day">${a.date}</div><div class="month">${a.month}</div></div>
+      <div class="appt-details">
+        <h4>${a.student} <span style="font-size:12px;font-weight:400;color:var(--text3);font-family:'JetBrains Mono',monospace;">${a.reg}</span></h4>
+        <div class="meta">${a.reason}</div>
+      </div>
+      <div class="appt-time">${a.time}</div>
+      <span class="status-badge status-${a.status}">${a.status.charAt(0).toUpperCase()+a.status.slice(1)}</span>
+      <button class="btn-sm" onclick="showPage('doc-prescription')">📝 Prescribe</button>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════════
+// PRESCRIPTION WRITE
+// ═══════════════════════════════════════════════════
+function addMedRow() {
+  const div = document.createElement('div');
+  div.className = 'med-input-row';
+  div.innerHTML = `
+    <div class="form-group" style="margin:0;"><input type="text" placeholder="Medicine name"/></div>
+    <div class="form-group" style="margin:0;"><input type="text" placeholder="Dosage"/></div>
+    <div class="form-group" style="margin:0;"><input type="text" placeholder="Duration"/></div>
+    <button class="btn-danger" onclick="this.closest('.med-input-row').remove()">✕</button>
+  `;
+  document.getElementById('meds-list').appendChild(div);
+}
+
+function clearRxForm() {
+  document.getElementById('rx-patient-name').value='';
+  document.getElementById('rx-patient-reg').value='';
+  document.getElementById('rx-diagnosis').value='';
+}
+
+function issueRx() {
+  const name = document.getElementById('rx-patient-name').value || 'Patient';
+  const reg = document.getElementById('rx-patient-reg').value || '—';
+  const diagnosis = document.getElementById('rx-diagnosis').value || '—';
+  const date = document.getElementById('rx-date').value;
+  // Collect meds
+  const medRows = document.getElementById('meds-list').querySelectorAll('.med-input-row');
+  const meds = [];
+  medRows.forEach(row => {
+    const inputs = row.querySelectorAll('input');
+    if (inputs[0]?.value) meds.push({ name: inputs[0].value, dose: inputs[1]?.value||'—', dur: inputs[2]?.value||'—' });
+  });
+  const rx = {
+    id: 'RX'+Date.now().toString().slice(-7),
+    date: new Date(date).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),
+    doctor: currentUser.name, dept: currentUser.dept,
+    patient: name, reg, diagnosis, meds,
+    notes: 'Follow prescribed dosage. Return if symptoms worsen.'
+  };
+  PRESCRIPTIONS.unshift(rx);
+  alert('✅ Prescription issued successfully! ID: ' + rx.id);
+  buildRxPreview();
+}
+
+function buildRxPreview() {
+  const rx = PRESCRIPTIONS[0] || {
+    id:'RX—', date:'—', doctor: currentUser.name||'Dr. Priya Suresh', dept:'General Medicine',
+    patient:'Preview Patient', reg:'RA—', diagnosis:'—',
+    meds:[{ name:'Medicine Name', dose:'Dosage', dur:'Duration' }],
+    notes:'Notes will appear here.'
+  };
+  const el = document.getElementById('rx-preview');
+  if (el) el.innerHTML = rxCardHTML(rx);
+}
+
+// ═══════════════════════════════════════════════════
+// TAB HELPERS
+// ═══════════════════════════════════════════════════
+function switchTab(group, panel, btn) {
+  const prefix = group + '-tab-';
+  document.querySelectorAll('[id^="'+prefix+'"]').forEach(p => p.classList.remove('active'));
+  document.getElementById(prefix+panel)?.classList.add('active');
+  if (btn) {
+    btn.closest('.tab-bar').querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+}
+function switchTabDirect(group, panel) {
+  const prefix = group + '-tab-';
+  document.querySelectorAll('[id^="'+prefix+'"]').forEach(p => p.classList.remove('active'));
+  document.getElementById(prefix+panel)?.classList.add('active');
+}
+</script>
+</body>
+</html>

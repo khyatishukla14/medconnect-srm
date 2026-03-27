@@ -240,7 +240,7 @@ function buildDeptGrid() {
 
 function openDept(id) {
   selectedDept = id;
-  const dept = DEPARTMENTS.find(d => d.id === id);
+  const dept = DEPARTMENTS.find(d => d.id === id)``;
   document.getElementById('dept-title').textContent = dept.icon + ' ' + dept.name;
   document.getElementById('dept-subtitle').textContent = dept.desc;
   buildDoctorGrid(id);
