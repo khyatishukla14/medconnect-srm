@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 // ═══════════════════════════════════════════════════
 // DATA
 // ═══════════════════════════════════════════════════
@@ -186,6 +187,13 @@ function showPage(id) {
 // ═══════════════════════════════════════════════════
 function initApp() {
   // Set today's date for prescription form
+=======
+// APP — Entry point. Initialises the correct portal
+// based on currentRole after login.
+
+function initApp() {
+  //Setting today's date for prescription form
+>>>>>>> Stashed changes
   const today = new Date().toISOString().split('T')[0];
   const rxDateEl = document.getElementById('rx-date');
   if (rxDateEl) rxDateEl.value = today;
@@ -196,13 +204,19 @@ function initApp() {
     buildRecords();
     buildChat();
     showPage('home');
+<<<<<<< Updated upstream
   } else {
+=======
+  }
+  else {
+>>>>>>> Stashed changes
     buildDocDashboard();
     buildDocPatients();
     buildChat();
     buildRxPreview();
     showPage('doc-dashboard');
   }
+<<<<<<< Updated upstream
 }
 
 // ═══════════════════════════════════════════════════
@@ -706,3 +720,6 @@ function switchTabDirect(group, panel) {
   document.querySelectorAll('[id^="'+prefix+'"]').forEach(p => p.classList.remove('active'));
   document.getElementById(prefix+panel)?.classList.add('active');
 }
+=======
+}
+>>>>>>> Stashed changes
